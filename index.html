@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<script>
+    function taskPostAPI(name, dueDate, priority, description,tag,res,err) {
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = () => {
+            if (request.readyState == 4 && request.status == 200) {
+                let obj = JSON.parse(request.responseText);
+                console.log(`${name},${dueDate},${priority},${description},${tag}) => ` + JSON.stringify(obj));
+                res(obj);
+            }
+        }
+    
+        request.ontimeout = err;
+        request.open("POST",`http://localhost:3000/POST/${name}/${dueDate}/${priority}/${description}/${tag})`);
+        request.send();
+       console.log(`post task(${name},${dueDate},${priority},${description},${tag})) requested.`);
+    }
+    function taskGetAPI(res,err) {
+        let request = new XMLHttpRequest();
+        let i = 1;
+        request.onreadystatechange = () => {
+            if (request.readyState == 4 && request.status == 200) {
+                let obj = JSON.parse(request.responseText);
+                res(obj);
+               len = obj.length
+                console.log(obj.length)
+                
+                for (i = 1; i < len; i++) {
+                    document.getElementById("db").innerHTML = "location: "+ i + " (name: " + obj[i]['name'] +" dueDate: "+ obj[i]['dueDate'] +" priority: "+ obj[i]['priority'] +" description:"+ obj[i]['description'] +" tag:"+ obj[i]['tag'] +" "
+                }
+            }
+        }
+        request.ontimeout = err;
+        request.open("GET",`http://localhost:3000/get`);
+        request.send(res);
+        console.log();
+        return ;
+       
+       
+    }
+    
+    
+    function addForm() {
+        let name=document.getElementById("name").value
+        let dueDate=document.getElementById('dueDate').value
+        let priority=document.getElementById('priority').value
+        let description=document.getElementById('description').value
+        let tag=document.getElementById('tag').value 
+        taskPostAPI(name, dueDate, priority, description,tag, ()=>{
+        },()=>{ console.log("timeout."); })
+    }
+    function loadForm() {
+        obj = taskGetAPI(()=>{
+          },()=>{ console.log("timeout."); })
+    
+    }
+    
+</script>
+
+<html>
+    <title>Load'em</title>
+    <body>
+        <input id="name" type="text" name="name" placeholder="Enter task  Name">
+        <input id="dueDate" type="text" name="dueDate" placeholder="Enter Due Date">
+        <input id="priority" type="text" name="priority" placeholder="Enter priority">
+        <input id="description" type="text" name="description" placeholder="description">
+        <input id="tag" type="text" name="tag" placeholder="tag">
+        <br>
+        <input type="submit" onclick="addForm()" value="Submit">
+        <input type="submit" onclick="loadForm()" value="Load">
+
+        <div id="db"></div>
+    </body>
+</html>
